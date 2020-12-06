@@ -1,8 +1,9 @@
-package com.android.mviexample
+package com.android.mviexample.ui.main
 
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
+import com.android.mviexample.R
 
 class MainFragment : Fragment(){
 

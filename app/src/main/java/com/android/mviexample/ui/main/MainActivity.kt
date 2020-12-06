@@ -1,7 +1,8 @@
-package com.android.mviexample
+package com.android.mviexample.ui.main
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.android.mviexample.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -12,7 +13,9 @@ class MainActivity : AppCompatActivity() {
     }
     fun showMainFragment(){
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, MainFragment(), "MainFragment")
+            .replace(
+                R.id.fragment_container,
+                MainFragment(), "MainFragment")
             .commit()
     }
 }
