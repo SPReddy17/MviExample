@@ -1,5 +1,7 @@
 package com.android.mviexample.api
 
+import com.android.mviexample.util.LiveDataCallAdapter
+import com.android.mviexample.util.LiveDataCallAdapterFactory
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -11,6 +13,8 @@ object MyRetrofitBuilder{
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(LiveDataCallAdapterFactory())
+
     }
 
     val apiService :ApiService by lazy {
@@ -18,6 +22,8 @@ object MyRetrofitBuilder{
             .build()
             .create(ApiService ::class.java)
     }
+
+
 
 
 }
