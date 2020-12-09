@@ -12,7 +12,7 @@ object Repository {
     fun getBlogPosts() : LiveData<DataState<MainViewState>>{
         return object : NetworkBoundResource<List<BlogPost>,MainViewState> (){
             override fun handleApiSuccessResponse(response: ApiSuccessResponse<List<BlogPost>>) {
-                TODO("Not yet implemented")
+
                 result.value = DataState.data(
                     null,
                     data = MainViewState(
@@ -22,7 +22,7 @@ object Repository {
             }
 
             override fun createCall(): LiveData<GenericApiResponse<List<BlogPost>>> {
-                TODO("Not yet implemented")
+
                 return MyRetrofitBuilder.apiService.getBlogPosts()
             }
 
@@ -32,7 +32,7 @@ object Repository {
     fun getUser(userId : String) :  LiveData<DataState<MainViewState>>{
         return object : NetworkBoundResource<User,MainViewState> (){
             override fun handleApiSuccessResponse(response: ApiSuccessResponse<User>) {
-                TODO("Not yet implemented")
+
                 result.value = DataState.data(
                     data = MainViewState(
                         user = response.body
@@ -41,7 +41,7 @@ object Repository {
             }
 
             override fun createCall(): LiveData<GenericApiResponse<User>> {
-                TODO("Not yet implemented")
+
                 return MyRetrofitBuilder.apiService.getUser(userId)
             }
 
