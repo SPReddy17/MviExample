@@ -10,11 +10,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.mviexample.R
 import com.android.mviexample.model.BlogPost
+import com.android.mviexample.model.User
 import com.android.mviexample.ui.DataStateListener
 import com.android.mviexample.ui.main.state.MainStateEvent
 import com.android.mviexample.ui.main.state.MainStateEvent.*
 import com.android.mviexample.util.TopSpacingItemDecoration
+import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_main.*
+import kotlinx.android.synthetic.main.layout_blog_list_item.*
 import java.lang.ClassCastException
 import java.lang.Exception
 
@@ -82,18 +85,27 @@ class MainFragment : Fragment(),BlogListAdapter.Interaction{
         })
 
         viewModel.viewState.observe(viewLifecycleOwner, Observer {viewState ->
-            viewState.blogPosts?.let {
-                println("DEBUG : Setting blog posts to RecyclerView : ${it}")
-                blogListAdapter.submitList(it)
+            viewState.blogPosts?.let {blogPosts ->
+                println("DEBUG : Setting blog posts to RecyclerView : ${blogPosts}")
+                blogListAdapter.submitList(blogPosts)
             }
             viewState.user?.let {
-                println("DEBUG : Setting user data : ${it}")
-
+                println("DEBUG : Setting user data : ${viewState.user}")
+                setUserProperties(it)
             }
         })
     }
 
+    private fun setUserProperties(user : User){
+        email.setText(user.email)
+        username.text = user.username
 
+        view?.let {
+             Glide.with(it.context)
+                 .load(user.image)
+                 .into(image)
+        }
+    }
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.main_menu,menu)
