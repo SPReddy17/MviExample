@@ -7,18 +7,25 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.mviexample.R
+import com.android.mviexample.model.BlogPost
 import com.android.mviexample.ui.DataStateListener
 import com.android.mviexample.ui.main.state.MainStateEvent
 import com.android.mviexample.ui.main.state.MainStateEvent.*
+import com.android.mviexample.util.TopSpacingItemDecoration
+import kotlinx.android.synthetic.main.fragment_main.*
 import java.lang.ClassCastException
 import java.lang.Exception
 
-class MainFragment : Fragment(){
+class MainFragment : Fragment(),BlogListAdapter.Interaction{
 
     lateinit var viewModel: MainViewModel
 
     lateinit var dataStateHandler: DataStateListener
+
+    lateinit var blogListAdapter : BlogListAdapter
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,8 +42,17 @@ class MainFragment : Fragment(){
             ViewModelProvider(this).get(MainViewModel::class.java)
         }?:throw Exception("Invalid activity")
         subscribeObservers()
+        initRecyclerView()
     }
-
+    private fun initRecyclerView(){
+        recycler_view.apply {
+            layoutManager =LinearLayoutManager(activity)
+            val topSpacingItemDecoration = TopSpacingItemDecoration(30)
+            addItemDecoration(topSpacingItemDecoration)
+            blogListAdapter = BlogListAdapter(this@MainFragment)
+            adapter = blogListAdapter
+        }
+    }
     fun subscribeObservers(){
         viewModel.dataState.observe(viewLifecycleOwner, Observer {dataState ->
 
@@ -68,13 +84,14 @@ class MainFragment : Fragment(){
         viewModel.viewState.observe(viewLifecycleOwner, Observer {viewState ->
             viewState.blogPosts?.let {
                 println("DEBUG : Setting blog posts to RecyclerView : ${it}")
+                blogListAdapter.submitList(it)
             }
             viewState.user?.let {
                 println("DEBUG : Setting user data : ${it}")
+
             }
         })
     }
-
 
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -107,5 +124,10 @@ class MainFragment : Fragment(){
         }catch (e : ClassCastException){
             println("DEBUG : $context must implement DataStateListener")
         }
+    }
+
+    override fun onItemSelected(position: Int, item: BlogPost) {
+        println("DEBUG : CLICKED $position ")
+        println("DEBUG : CLICKED $item ")
     }
 }
