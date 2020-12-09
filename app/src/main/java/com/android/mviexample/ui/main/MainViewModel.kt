@@ -11,6 +11,7 @@ import com.android.mviexample.ui.main.state.MainStateEvent
 import com.android.mviexample.ui.main.state.MainStateEvent.*
 import com.android.mviexample.ui.main.state.MainViewState
 import com.android.mviexample.util.AbsentLiveData
+import com.android.mviexample.util.DataState
 
 class MainViewModel :ViewModel(){
 
@@ -20,7 +21,7 @@ class MainViewModel :ViewModel(){
     val viewState : LiveData<MainViewState>
     get() = _viewState
 
-    val dataState :LiveData<MainViewState> =  Transformations
+    val dataState :LiveData<DataState<MainViewState>> =  Transformations
 
         .switchMap(_stateEvent){stateEvent ->
             stateEvent?.let {
@@ -29,7 +30,7 @@ class MainViewModel :ViewModel(){
 
         }
 
-    fun handleStateEvent(stateEvent : MainStateEvent) : LiveData<MainViewState>{
+    fun handleStateEvent(stateEvent : MainStateEvent) : LiveData<DataState<MainViewState>>{
         when(stateEvent){
             is GetBlogPostsEvent -> {
                 return Repository.getBlogPosts()

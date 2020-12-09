@@ -1,18 +1,34 @@
 package com.android.mviexample.ui.main
 
+import android.content.Context
 import android.os.Bundle
+import android.os.Handler
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.mviexample.R
+import com.android.mviexample.model.BlogPost
+import com.android.mviexample.model.User
+import com.android.mviexample.ui.DataStateListener
 import com.android.mviexample.ui.main.state.MainStateEvent
 import com.android.mviexample.ui.main.state.MainStateEvent.*
+import com.android.mviexample.util.TopSpacingItemDecoration
+import com.bumptech.glide.Glide
+import kotlinx.android.synthetic.main.fragment_main.*
+import kotlinx.android.synthetic.main.layout_blog_list_item.*
+import java.lang.ClassCastException
 import java.lang.Exception
 
-class MainFragment : Fragment(){
+class MainFragment : Fragment(),BlogListAdapter.Interaction{
 
     lateinit var viewModel: MainViewModel
+
+    lateinit var dataStateHandler: DataStateListener
+
+    lateinit var blogListAdapter : BlogListAdapter
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,34 +45,67 @@ class MainFragment : Fragment(){
             ViewModelProvider(this).get(MainViewModel::class.java)
         }?:throw Exception("Invalid activity")
         subscribeObservers()
+        initRecyclerView()
     }
-
+    private fun initRecyclerView(){
+        recycler_view.apply {
+            layoutManager =LinearLayoutManager(activity)
+            val topSpacingItemDecoration = TopSpacingItemDecoration(30)
+            addItemDecoration(topSpacingItemDecoration)
+            blogListAdapter = BlogListAdapter(this@MainFragment)
+            adapter = blogListAdapter
+        }
+    }
     fun subscribeObservers(){
         viewModel.dataState.observe(viewLifecycleOwner, Observer {dataState ->
+
             println("DEBUG : DataState : ${dataState}")
-            dataState.blogPosts?.let {blogPosts ->
-                // set BlogPosts Data
-                viewModel.setBlogListData(blogPosts)
+
+            //handle loading and message
+            dataStateHandler.onDataStateChange(dataState)
+
+            // handle Data<T>
+            dataState.data?.let {event ->
+                event.getContentIfNotHandled()?.let {mainViewState ->
+                    mainViewState.blogPosts?.let {
+                        // set BlogPosts Data
+                        viewModel.setBlogListData(it)
+                    }
+                    mainViewState.user?.let {
+                        // set User Data
+                        viewModel.setUser(it)
+                    }
+                }
+
+
             }
-            dataState.user?.let {user ->
-                // set User Data
-                viewModel.setUser(user)
-            }
+
+
 
         })
 
         viewModel.viewState.observe(viewLifecycleOwner, Observer {viewState ->
-            viewState.blogPosts?.let {
-                println("DEBUG : Setting blog posts to RecyclerView : ${it}")
+            viewState.blogPosts?.let {blogPosts ->
+                println("DEBUG : Setting blog posts to RecyclerView : ${blogPosts}")
+                blogListAdapter.submitList(blogPosts)
             }
             viewState.user?.let {
-                println("DEBUG : Setting user data : ${it}")
+                println("DEBUG : Setting user data : ${viewState.user}")
+                setUserProperties(it)
             }
         })
     }
 
+    private fun setUserProperties(user : User){
+        email.setText(user.email)
+        username.text = user.username
 
-
+        view?.let {
+             Glide.with(it.context)
+                 .load(user.image)
+                 .into(image)
+        }
+    }
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.main_menu,menu)
@@ -80,6 +129,17 @@ class MainFragment : Fragment(){
     }
 
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        try {
+            dataStateHandler = context as DataStateListener
+        }catch (e : ClassCastException){
+            println("DEBUG : $context must implement DataStateListener")
+        }
+    }
 
-
+    override fun onItemSelected(position: Int, item: BlogPost) {
+        println("DEBUG : CLICKED $position ")
+        println("DEBUG : CLICKED $item ")
+    }
 }
